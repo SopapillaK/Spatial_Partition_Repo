@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace SpatialPartitionPattern
 {
@@ -29,10 +31,13 @@ namespace SpatialPartitionPattern
         int cellSize = 10;
 
         //Number of soldiers on each team
-        int numberOfSoldiers = 100;
+        public int numberOfSoldiers = 100;
 
         //The Spatial Partition grid
         Grid grid;
+
+        // TextMeshPro
+        public TMP_Text timer;
 
         void Start()
         {
@@ -71,6 +76,9 @@ namespace SpatialPartitionPattern
 
         void Update()
         {
+            // measuring performance
+            float startTime = Time.realtimeSinceStartup ;
+
             //Move the enemies
             for (int i = 0; i < enemySoldiers.Count; i++)
             {
@@ -106,6 +114,10 @@ namespace SpatialPartitionPattern
                     friendlySoldiers[i].Move(closestEnemy);
                 }
             }
+
+            float elapsedTime = (Time.realtimeSinceStartup - startTime) * 1000f;
+            Debug.Log(elapsedTime + "ms");
+            timer.SetText(elapsedTime + "ms");
         }
 
         //Find the closest enemy - slow version
@@ -132,5 +144,30 @@ namespace SpatialPartitionPattern
 
             return closestEnemy;
         }
+
+        /* Buttons
+        public void ButtonsClicked()
+        {
+            if (numberOfSoldiers != 50)
+            {
+                numberOfSoldiers = 50;
+                Restart();
+            }
+            if (numberOfSoldiers != 100)
+            {
+                numberOfSoldiers = 100;
+                Restart();
+            }
+            if (numberOfSoldiers != 150)
+            {
+                numberOfSoldiers = 150;
+                Restart();
+            }
+        }
+
+        private void Restart()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        } */
     }
 }
