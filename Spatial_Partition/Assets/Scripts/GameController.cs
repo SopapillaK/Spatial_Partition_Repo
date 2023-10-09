@@ -30,8 +30,10 @@ namespace SpatialPartitionPattern
         float mapWidth = 50f;
         int cellSize = 10;
 
+        public bool useSpatialParition = false;
+
         //Number of soldiers on each team
-        public int numberOfSoldiers = 100;
+        public int numberOfSoldiers = 0;
 
         //The Spatial Partition grid
         Grid grid;
@@ -48,7 +50,7 @@ namespace SpatialPartitionPattern
             for (int i = 0; i < numberOfSoldiers; i++)
             {
                 //Give the enemy a random position
-                Vector3 randomPos = new Vector3(Random.Range(0f, mapWidth), 0.5f, Random.Range(0f, mapWidth));
+                Vector3 randomPos = new Vector3(Random.Range(0f, mapWidth), Random.Range(0.5f, mapWidth), Random.Range(0f, mapWidth));
 
                 //Create a new enemy
                 GameObject newEnemy = Instantiate(enemyObj, randomPos, Quaternion.identity) as GameObject;
@@ -61,7 +63,7 @@ namespace SpatialPartitionPattern
 
 
                 //Give the friendly a random position
-                randomPos = new Vector3(Random.Range(0f, mapWidth), 0.5f, Random.Range(0f, mapWidth));
+                randomPos = new Vector3(Random.Range(0f, mapWidth), Random.Range(0.5f, mapWidth), Random.Range(0f, mapWidth));
 
                 //Create a new friendly
                 GameObject newFriendly = Instantiate(friendlyObj, randomPos, Quaternion.identity) as GameObject;
@@ -93,24 +95,29 @@ namespace SpatialPartitionPattern
 
             //Reset the list with closest enemies
             closestEnemies.Clear();
+            Soldier closestEnemy;
 
             //For each friendly, find the closest enemy and change its color and chase it
             for (int i = 0; i < friendlySoldiers.Count; i++)
             {
-                //Soldier closestEnemy = FindClosestEnemySlow(friendlySoldiers[i]);
+                if (useSpatialParition)
+                {
+                    closestEnemy = grid.FindClosestEnemy(friendlySoldiers[i]);
+                }
+                else
+                {
+                    closestEnemy = FindClosestEnemySlow(friendlySoldiers[i]);
+                }
 
-                //The fast version with spatial partition
-                Soldier closestEnemy = grid.FindClosestEnemy(friendlySoldiers[i]);
-
-                //If we found an enemy
+                //if we found an enemy
                 if (closestEnemy != null)
                 {
-                    //Change material
+                    //change material
                     closestEnemy.soldierMeshRenderer.material = closestEnemyMaterial;
 
                     closestEnemies.Add(closestEnemy);
 
-                    //Move the friendly in the direction of the enemy
+                    //move the friendly in the direction of the enemy
                     friendlySoldiers[i].Move(closestEnemy);
                 }
             }
@@ -145,29 +152,40 @@ namespace SpatialPartitionPattern
             return closestEnemy;
         }
 
-        /* Buttons
-        public void ButtonsClicked()
+        public void ToggleSP()
         {
-            if (numberOfSoldiers != 50)
-            {
-                numberOfSoldiers = 50;
-                Restart();
-            }
-            if (numberOfSoldiers != 100)
-            {
-                numberOfSoldiers = 100;
-                Restart();
-            }
-            if (numberOfSoldiers != 150)
-            {
-                numberOfSoldiers = 150;
-                Restart();
-            }
+            useSpatialParition = !useSpatialParition;
         }
 
-        private void Restart()
+        public void AddSoldiers()
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        } */
+            numberOfSoldiers += 100;
+            for (int i = 0; i < numberOfSoldiers; i++)
+            {
+                //Give the enemy a random position
+                Vector3 randomPos = new Vector3(Random.Range(0f, mapWidth), Random.Range(0.5f, mapWidth), Random.Range(0f, mapWidth));
+
+                //create a new enemy
+                GameObject newEnemy = Instantiate(enemyObj, randomPos, Quaternion.identity) as GameObject;
+
+                //add the enmy to a list
+                enemySoldiers.Add(new Enemy(newEnemy, mapWidth, grid));
+
+                //parent it
+                newEnemy.transform.parent = enemyParent;
+
+                //give the friendly a random position
+                randomPos = new Vector3(Random.Range(0f, mapWidth), 0.5f, Random.Range(0f, mapWidth));
+
+                //Create a new friendly
+                GameObject newFriendly = Instantiate(friendlyObj, randomPos, Quaternion.identity) as GameObject;
+
+                //Add the friendly to a list
+                friendlySoldiers.Add(new Friendly(newFriendly, mapWidth));
+
+                //Parent it
+                newFriendly.transform.parent = friendlyParent;
+            }
+        }
     }
 }
